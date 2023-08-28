@@ -4,7 +4,8 @@ Parameterize a unit test
 """
 import unittest
 from parameterized import parameterized
-from utils import access_nested_map
+from unittest.mock import patch, Mock
+from utils import access_nested_map, get_json
 
 
 class TestAccessNestedMap(unittest.TestCase):
@@ -29,5 +30,22 @@ class TestAccessNestedMap(unittest.TestCase):
         with self.assertRaises(KeyError):
             access_nested_map(nested_map, path)
 
-# if __name__ == "__main__":
-#     unittest.main()
+
+class TestGetJson(unittest.TestCase):
+
+    @parameterized.expand([
+        ("http://example.com", {"payload": True}),
+        ("http://holberton.io", {"payload": False})
+    ])
+    def test_get_json(self, url, payload):
+        '''Mock HTTP calls'''
+        class Mocked(Mock):
+            '''class object inherits from Mock'''
+
+            def json(self):
+                '''return test_payload'''
+                return payload
+
+        with patch("requests.get") as MockClass:
+            MockClass.return_value = Mocked()
+            self.assertEqual(get_json(url), payload)
